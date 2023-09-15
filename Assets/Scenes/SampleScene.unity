@@ -510,6 +510,7 @@ MonoBehaviour:
     player: {fileID: 1133588790}
     ballPrefab: {fileID: 911859811}
     blockPrefab: {fileID: 5590036051484846007, guid: 983bf6661d7384e83b451169bb7e1799, type: 3}
+    blockHp: 2
     balls: []
     blocks: []
   gameEvent: {fileID: 759459463}

@@ -31,6 +31,7 @@ public class BallSystem
             MoveBall();
             HitObject();
         }
+        else if (gameState.gameStatus == GameStatus.GameClear) Debug.Log("####CLEAR");
     }
 
     void AddDirec()
@@ -64,7 +65,7 @@ public class BallSystem
 
         Debug.DrawLine(ray.origin, ray.origin+ray.direction * 100, Color.red, 0);
 
-        bool isHit = Physics.SphereCast(ballPos, 0.1f, ballComp.direction, out hit, 0.5f, mask);
+        bool isHit = Physics.SphereCast(ballPos, 0.5f, ballComp.direction, out hit, 0.1f, mask);
 
         if (isHit)
         {

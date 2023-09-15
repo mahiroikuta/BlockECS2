@@ -6,28 +6,32 @@ public class BlockSystem
 {
     GameState gameState;
     GameEvent gameEvent;
+    BlockPool blockPool;
     float time = 0;
-    const float interval = 5f;
+    const float interval = 8f;
     const float height = 1.5f;
-    const float width = 2.5f;
 
-    public BlockSystem(GameState _gameState, GameEvent _gameEvent)
+    public BlockSystem(GameState _gameState, GameEvent _gameEvent, BlockPool _blockPool)
     {
         gameState = _gameState;
         gameEvent = _gameEvent;
         gameEvent.ballHitBlock += DamageBlock;
+        blockPool = _blockPool;
 
         InitGeneBlocks();
     }
 
     public void OnUpdate()
     {
-        CountTimer();
-        if (time > interval)
+        if (gameState.gameStatus == GameStatus.IsPlaying)
         {
-            MoveBlocks();
-            GeneBlocks();
-            time = 0;
+            CountTimer();
+            if (time > interval)
+            {
+                MoveBlocks();
+                GeneBlocks();
+                time = 0;
+            }
         }
     }
 
@@ -35,11 +39,12 @@ public class BlockSystem
     {
         for (int i=0 ; i<3 ; i++)
         {
-            for (int j=0 ; j<3 ; j++)
-            {
-                GameObject block = GameObject.Instantiate(gameState.blockPrefab, new Vector3(i*width-2.5f, 8-j*height, -1), Quaternion.identity);
-                gameState.blocks.Add(block);
-            }
+            GameObject upperBlock = blockPool.OnSpawnBlock(gameState.blockPrefab, i, 0);
+            gameState.blocks.Add(upperBlock);
+            GameObject middleBlock = blockPool.OnSpawnBlock(gameState.blockPrefab, i, 1);
+            gameState.blocks.Add(middleBlock);
+            GameObject lowerBlock = blockPool.OnSpawnBlock(gameState.blockPrefab, i, 2);
+            gameState.blocks.Add(lowerBlock);
         }
     }
 
@@ -62,19 +67,21 @@ public class BlockSystem
     {
         for (int i=0 ; i<3 ; i++)
         {
-            GameObject block = GameObject.Instantiate(gameState.blockPrefab, new Vector3(i*width-2.5f, 8, -1), Quaternion.identity);
+            GameObject block = blockPool.OnSpawnBlock(gameState.blockPrefab, i);
             gameState.blocks.Add(block);
         }
     }
 
     void DamageBlock(GameObject block)
     {
-        int hp = block.GetComponent<BlockComponent>().hp;
-        hp--;
-        if (hp == 0)
+        BlockComponent blockComp = block.GetComponent<BlockComponent>();
+        blockComp.hp--;
+        if (blockComp.hp <= 0)
         {
+            blockComp.hp = gameState.blockHp;
+            gameEvent.onRemoveGameObject?.Invoke(block);
             gameState.blocks.Remove(block);
-            GameObject.Destroy(block);
         }
+        block.GetComponent<BlockComponent>().hp = blockComp.hp;
     }
 }
